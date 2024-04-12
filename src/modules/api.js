@@ -7,9 +7,8 @@ class API {
     return `http://api.weatherapi.com/v1/current.json?key=${this.APIKey}&q=${location}&aqi=no`;
   }
 
-  createForecastURL(location, days=7){
-    return `http://api.weatherapi.com/v1/forecast.json?key=${this.APIKey}&q=${location}&days=${days}&aqi=no&alerts=no
-    `
+  createForecastURL(location, days=8){
+    return `http://api.weatherapi.com/v1/forecast.json?key=${this.APIKey}&q=${location}&days=${days}&aqi=no&alerts=no`
   }
 
   async fetchResponse(url) {
@@ -21,10 +20,19 @@ class API {
         throw new Error("Network response was not OK");
       }
       const responseJSON = await response.json();
-      console.log(responseJSON);
       return responseJSON;
     } catch (error) {
       console.log("Error in getting current data: ", error);
+    }
+  }
+
+  async fetchForecastResponse(location, days=8){
+    const url = this.createForecastURL(location, days);
+    try{
+      const responseJSON = await this.fetchResponse(url);
+      return responseJSON;
+    } catch(error){
+      console.log("Error in fetching data: ", error);
     }
   }
 }
