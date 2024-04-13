@@ -1,40 +1,42 @@
 import API from "./api.js";
-import Weather from "./weather.js"
+import Weather from "./weather.js";
+import AppIcon from "../assets/icons/weather-app-icon.svg";
 
 const APIKey = "1cb6dfdb758948eabb403513240404";
 
-export default class UI{
-  constructor(){
+export default class UI {
+  constructor() {
     this.api = new API(APIKey);
     this.cacheDOM();
     this.createBoilerPlate();
     this.cacheDOMWrapper();
     this.addInfoCardStructure();
+    this.headerIcon.src = AppIcon;
     this.addMapping();
     this.bindEvents();
     this.initialLoad();
   }
 
-  async initialLoad(){
+  async initialLoad() {
     const response = await this.api.fetchForecastResponse("london");
     this.weatherData = new Weather(response);
     this.loadCurrentInfo();
     this.loadForecastInfo();
   }
 
-  cacheDOM(){
+  cacheDOM() {
     this.wrapper = document.querySelector("#wrapper");
   }
 
-  createBoilerPlate(){
+  createBoilerPlate() {
     this.wrapper.innerHTML = `
       <div class="header"> 
-        <div class="header-logo"><img id="header-logo" src="#" alt="header logo"></div>
+        <div class="header-icon-container"><img id="header-icon" alt="header icon"></div>
         <div class="search">
         <form action="#" method="post" id="search-form">
           <label for="search-content" >Search</label>
           <input type="text" name="search-content" id="search-content">
-          <input type="submit" value="Submit">
+          <input class="btn" type="submit" value="Submit">
         </form>
         </div>
       </div>
@@ -43,7 +45,9 @@ export default class UI{
           <div id="location"></div>
           <div id="date"></div>
           <div id="local-time"></div>
-          <div id="current-icon"></div>
+          <div id="current-icon-container">
+          <img id="current-icon" src='#' alt="weather icon">
+          </div>
           <div id="current-temp">
           </div>
         </div>
@@ -62,10 +66,11 @@ export default class UI{
         <div class="forecast-info-grid"> 
         </div>
       </div>
-    `
+    `;
   }
 
-  cacheDOMWrapper(){
+  cacheDOMWrapper() {
+    this.headerIcon = document.querySelector("#header-icon")
     this.searchForm = document.querySelector("#search-form");
     this.searchContent = document.querySelector("#search-content");
     this.mainContent = document.querySelector(".main-content");
@@ -73,6 +78,7 @@ export default class UI{
     this.currentLocation = document.querySelector("#location");
     this.currentDate = document.querySelector("#date");
     this.localTime = document.querySelector("#local-time");
+    this.currentIconContainer = document.querySelector("#current-icon-container");
     this.currentIcon = document.querySelector("#current-icon");
     this.currentTemp = document.querySelector("#current-temp");
 
@@ -89,11 +95,11 @@ export default class UI{
 
     this.currentInfoCards = document.querySelectorAll(".current-info-card");
 
-    this.forecastInfoGrid = document.querySelector(".forecast-info-grid")
+    this.forecastInfoGrid = document.querySelector(".forecast-info-grid");
   }
 
-  addInfoCardStructure(){
-    this.currentInfoCards.forEach(card => {
+  addInfoCardStructure() {
+    this.currentInfoCards.forEach((card) => {
       const infoName = document.createElement("div");
       infoName.classList.add("info-name");
 
@@ -106,45 +112,47 @@ export default class UI{
       card.appendChild(infoName);
       card.appendChild(infoIcon);
       card.appendChild(infoContent);
-    })
+    });
   }
 
-  addMapping(){
+  addMapping() {
     this.currentInfoMap = {
       "sunrise-time": { name: "Sunrise", property: "sunrise" },
       "sunset-time": { name: "Sunset", property: "sunset" },
       "chance-of-rain": { name: "Chance of Rain", property: "chanceOfRain" },
-      "humidity": { name: "Humidity", property: "humidity" },
+      humidity: { name: "Humidity", property: "humidity" },
       "wind-speed": { name: "Wind Speed", property: "windSpeed" },
       "feels-like": { name: "Feels Like", property: "feelsLike" },
-      "precipitation": { name: "Precipitation", property: "precipitation" },
-      "pressure": { name: "Pressure", property: "pressure" },
-      "visibility": { name: "Visibility", property: "visibility" },
+      precipitation: { name: "Precipitation", property: "precipitation" },
+      pressure: { name: "Pressure", property: "pressure" },
+      visibility: { name: "Visibility", property: "visibility" },
       "uv-index": { name: "UV Index", property: "uv" },
-    }
+    };
   }
 
-  async search(event){
+  async search(event) {
     event.preventDefault();
-    const location =  this.getInput();
+    const location = this.getInput();
     const response = await this.api.fetchForecastResponse(location);
     this.weatherData = new Weather(response);
     this.loadCurrentInfo();
     this.loadForecastInfo();
   }
 
-  getInput(){
+  getInput() {
     const val = this.searchContent.value;
     this.searchContent.value = "";
     this.searchContent.blur();
     return val;
   }
 
-  bindEvents(){
-    this.searchForm.addEventListener("submit",e => {this.search(e)});
+  bindEvents() {
+    this.searchForm.addEventListener("submit", (e) => {
+      this.search(e);
+    });
   }
 
-  loadCurrentInfo(){
+  loadCurrentInfo() {
     if (!this.weatherData || !this.weatherData.currentDataMetric) {
       console.log("No weather data available.");
     }
@@ -155,47 +163,46 @@ export default class UI{
     this.localTime.textContent = this.weatherData.time;
     this.currentTemp.textContent = currentData.temp;
 
-    const weatherIcon = document.createElement("img");
-    weatherIcon.alt = "weather icon";
-    weatherIcon.src = currentData.condition.icon;
-    this.currentIcon.appendChild(weatherIcon);
-    
-    this.currentInfoCards.forEach(card => {
+    this.currentIcon.src = currentData.condition.icon;
+
+    this.currentInfoCards.forEach((card) => {
       this.fillCardInfo(card, currentData);
     });
   }
 
-  fillCardInfo(card, currentData){
+  fillCardInfo(card, currentData) {
     const cardId = card.id;
     const infoName = card.querySelector(".info-name");
     const infoContent = card.querySelector(".info-content");
 
     const cardMapping = this.currentInfoMap[cardId];
-    if(cardMapping){
-      infoName.textContent =cardMapping.name;
+    if (cardMapping) {
+      infoName.textContent = cardMapping.name;
       infoContent.textContent = currentData[cardMapping.property];
     }
   }
 
-  loadForecastInfo(){
+  loadForecastInfo() {
     const forecastData = this.weatherData.forecastDataMetric;
     this.clear(this.forecastInfoGrid);
-    this.forecastInfoGrid.innerHTML = `        
-      <div>Day</div>
-      <div>Chance of Rain</div>
-      <div></div>
-      <div>Humidity</div>
-      <div>Low</div>
-      <div>High</div>
-    `
-    forecastData.forEach(element => {
+    this.forecastInfoGrid.innerHTML = `
+      <div class="forecast-heading">        
+        <div>Day</div>
+        <div></div>
+        <div>Chance of Rain</div>
+        <div>Humidity</div>
+        <div>Low</div>
+        <div>High</div>
+      </div>
+    `;
+    forecastData.forEach((element) => {
       this.createForecastCard(element);
-    })
+    });
   }
 
-  createForecastCard(element){
+  createForecastCard(element) {
     const forecastCard = document.createElement("div");
-
+    forecastCard.classList.add("forecast-card");
     const day = document.createElement("div");
     const chanceOfRain = document.createElement("div");
     const humidity = document.createElement("div");
@@ -223,15 +230,15 @@ export default class UI{
     this.forecastInfoGrid.appendChild(forecastCard);
   }
 
-  clear(element){
+  clear(element) {
     if (element) {
       // Loop through all child nodes of the element
       while (element.firstChild) {
-          // Remove each child node
-          element.removeChild(element.firstChild);
+        // Remove each child node
+        element.removeChild(element.firstChild);
       }
-  } else {
+    } else {
       console.error("Element is undefined or null.");
-  }
+    }
   }
 }

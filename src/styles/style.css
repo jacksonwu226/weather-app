@@ -1,0 +1,138 @@
+@import url('https://fonts.googleapis.com/css2?family=Kantumruy+Pro:ital,wght@0,100..700;1,100..700&display=swap');
+
+:root{
+  --clr-primary-1: #092635;
+  --clr-primary-2: #1B4242;
+  --clr-primary-3: #5C8374;
+  --clr-primary-4: #9EC8B9;
+}
+
+*, *::before, *::after{
+  font-family: inherit;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+button{
+  cursor: pointer;
+}
+body{
+  margin: 0;
+  padding: 0;
+  font-family: 'Kantumruy Pro', sans-serif;
+  font-weight: 300;
+  font-size: 1.5rem;
+  color: var(black);
+  background-color: var(--clr-primary-4);
+
+}
+
+#wrapper{
+  height: 100vh;
+  width: 100vw;
+}
+
+.header{
+  display: flex;
+  height: 100px;
+  justify-content: space-around;
+  align-items: center;
+  background-color: var(--clr-primary-1);
+  box-shadow: 1px 1px 2px black;
+  margin-bottom: 2rem;
+  color: white;
+}
+
+.header-icon-container{
+  height: 100%;
+}
+#header-icon{
+  height: 90%;
+  width: 90%;
+}
+
+#search-form{
+  display: flex;
+  gap: 0.25rem;
+}
+#search-content{
+  color: black;
+}
+.btn{
+  cursor: pointer;
+  background: var(--clr-primary-4);
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+  border-radius: 0.5rem;
+  border: 1px solid grey;
+  color: black;
+}
+
+.main-content{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.current-main{
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: repeat(4, 1fr);
+  gap: 0.5rem;
+  width: 80%;
+}
+.current-main div{
+  /* text-align: center; */
+  align-self: center;
+}
+#current-icon-container{
+  grid-area: 1 / 1 / 5 / 2;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.current-info-grid{
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  grid-template-rows: 1fr 1fr;
+  gap: 1rem;
+  color: white;
+  width: 80%;
+  margin-bottom: 1rem;
+}
+.current-info-card{
+  background-color: var(--clr-primary-2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-around;
+  padding: 1rem;
+}
+
+.forecast-info-grid{
+  display: flex;
+  flex-direction: column;
+  width: 80%;
+  background-color: var(--clr-primary-4);
+  gap: 0.5rem;
+}
+.forecast-heading,
+.forecast-card{
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 2rem;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem;
+}
+
+.forecast-heading{
+  background-color: var(--clr-primary-1);
+  color: white;
+  margin-bottom: 1rem;
+}
+.forecast-card{
+  background-color: var(--clr-primary-2);
+  color: white;
+}

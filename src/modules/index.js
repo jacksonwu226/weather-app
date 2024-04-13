@@ -1,8 +1,5 @@
-import API from "./api.js";
 import UI from "./UI.js";
-import Weather from "./weather.js"
-
-const APIKey = "1cb6dfdb758948eabb403513240404";
+import "../styles/style.css"
 
 function addWrapper() {
   const body = document.querySelector("body");
