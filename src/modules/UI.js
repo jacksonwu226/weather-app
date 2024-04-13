@@ -12,6 +12,14 @@ export default class UI{
     this.addInfoCardStructure();
     this.addMapping();
     this.bindEvents();
+    this.initialLoad();
+  }
+
+  async initialLoad(){
+    const response = await this.api.fetchForecastResponse("london");
+    this.weatherData = new Weather(response);
+    this.loadCurrentInfo();
+    this.loadForecastInfo();
   }
 
   cacheDOM(){
@@ -31,13 +39,12 @@ export default class UI{
         </div>
       </div>
       <div class='main-content'>
-        <div class="current-main>
-          <div id="location>
-          </div>
+        <div class="current-main">
+          <div id="location"></div>
           <div id="date"></div>
           <div id="local-time"></div>
           <div id="current-icon"></div>
-          <div id="temp">
+          <div id="current-temp">
           </div>
         </div>
         <div class="current-info-grid">
@@ -52,7 +59,8 @@ export default class UI{
           <div class="current-info-card" id="visibility"></div>
           <div class="current-info-card" id="uv-index"></div>
         </div>
-        <div class="forecast-info> </div>
+        <div class="forecast-info-grid"> 
+        </div>
       </div>
     `
   }
@@ -61,6 +69,13 @@ export default class UI{
     this.searchForm = document.querySelector("#search-form");
     this.searchContent = document.querySelector("#search-content");
     this.mainContent = document.querySelector(".main-content");
+
+    this.currentLocation = document.querySelector("#location");
+    this.currentDate = document.querySelector("#date");
+    this.localTime = document.querySelector("#local-time");
+    this.currentIcon = document.querySelector("#current-icon");
+    this.currentTemp = document.querySelector("#current-temp");
+
     this.sunriseTime = document.querySelector("#sunrise-time");
     this.sunsetTime = document.querySelector("#chance-of-rain");
     this.chanceOfRain = document.querySelector("#chance-of-rain");
@@ -73,6 +88,8 @@ export default class UI{
     this.UVIndex = document.querySelector("#uv-index");
 
     this.currentInfoCards = document.querySelectorAll(".current-info-card");
+
+    this.forecastInfoGrid = document.querySelector(".forecast-info-grid")
   }
 
   addInfoCardStructure(){
@@ -113,10 +130,14 @@ export default class UI{
     const response = await this.api.fetchForecastResponse(location);
     this.weatherData = new Weather(response);
     this.loadCurrentInfo();
+    this.loadForecastInfo();
   }
 
   getInput(){
-    return this.searchContent.value;
+    const val = this.searchContent.value;
+    this.searchContent.value = "";
+    this.searchContent.blur();
+    return val;
   }
 
   bindEvents(){
@@ -127,8 +148,18 @@ export default class UI{
     if (!this.weatherData || !this.weatherData.currentDataMetric) {
       console.log("No weather data available.");
     }
-    const currentData = this.weatherData.currentDataMetric;
 
+    const currentData = this.weatherData.currentDataMetric;
+    this.currentLocation.textContent = this.weatherData.location;
+    this.currentDate.textContent = this.weatherData.date;
+    this.localTime.textContent = this.weatherData.time;
+    this.currentTemp.textContent = currentData.temp;
+
+    const weatherIcon = document.createElement("img");
+    weatherIcon.alt = "weather icon";
+    weatherIcon.src = currentData.condition.icon;
+    this.currentIcon.appendChild(weatherIcon);
+    
     this.currentInfoCards.forEach(card => {
       this.fillCardInfo(card, currentData);
     });
@@ -137,7 +168,7 @@ export default class UI{
   fillCardInfo(card, currentData){
     const cardId = card.id;
     const infoName = card.querySelector(".info-name");
-    const infoContent =card.querySelector(".info-content");
+    const infoContent = card.querySelector(".info-content");
 
     const cardMapping = this.currentInfoMap[cardId];
     if(cardMapping){
@@ -145,5 +176,62 @@ export default class UI{
       infoContent.textContent = currentData[cardMapping.property];
     }
   }
-  
+
+  loadForecastInfo(){
+    const forecastData = this.weatherData.forecastDataMetric;
+    this.clear(this.forecastInfoGrid);
+    this.forecastInfoGrid.innerHTML = `        
+      <div>Day</div>
+      <div>Chance of Rain</div>
+      <div></div>
+      <div>Humidity</div>
+      <div>Low</div>
+      <div>High</div>
+    `
+    forecastData.forEach(element => {
+      this.createForecastCard(element);
+    })
+  }
+
+  createForecastCard(element){
+    const forecastCard = document.createElement("div");
+
+    const day = document.createElement("div");
+    const chanceOfRain = document.createElement("div");
+    const humidity = document.createElement("div");
+    const maxTemp = document.createElement("div");
+    const minTemp = document.createElement("div");
+    const imgContainer = document.createElement("div");
+    const icon = document.createElement("img");
+    icon.alt = "weather icon";
+    icon.src = element.condition.icon;
+    imgContainer.appendChild(icon);
+
+    day.textContent = element.date;
+    chanceOfRain.textContent = element.chanceOfRain;
+    humidity.textContent = element.humidity;
+    maxTemp.textContent = element.maxTemp;
+    minTemp.textContent = element.minTemp;
+
+    forecastCard.appendChild(day);
+    forecastCard.appendChild(imgContainer);
+    forecastCard.appendChild(chanceOfRain);
+    forecastCard.appendChild(humidity);
+    forecastCard.appendChild(minTemp);
+    forecastCard.appendChild(maxTemp);
+
+    this.forecastInfoGrid.appendChild(forecastCard);
+  }
+
+  clear(element){
+    if (element) {
+      // Loop through all child nodes of the element
+      while (element.firstChild) {
+          // Remove each child node
+          element.removeChild(element.firstChild);
+      }
+  } else {
+      console.error("Element is undefined or null.");
+  }
+  }
 }
