@@ -30,6 +30,7 @@ class API {
     const url = this.createForecastURL(location, days);
     try {
       const responseJSON = await this.fetchResponse(url);
+      console.log(responseJSON);
       return responseJSON;
     } catch (error) {
       console.log("Error in fetching data: ", error);
